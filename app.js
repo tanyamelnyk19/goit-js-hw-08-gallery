@@ -113,7 +113,7 @@ function lightboxOpen(event) {
         activeIndex = index;
       }
   })
-console.log('activeIndex :>> ', activeIndex);
+
   lightbox.classList.add('is-open');
   lightboxImage.setAttribute('src', event.target.dataset.source);
   lightboxImage.setAttribute('alt', event.target.alt);
