@@ -65,7 +65,10 @@ const galleryItems = [
 ];
 
 const galleryContainer = document.querySelector('.js-gallery');
-console.log(galleryContainer);
+const lightboxImage = document.querySelector('.lightbox__image');
+const lightboxOverlay = document.querySelector('.lightbox__overlay');
+
+let activeIndex = 0;
 
 const galleryMarkup = createGalleryMarkup(galleryItems);
 galleryContainer.insertAdjacentHTML('beforeend', galleryMarkup);
@@ -94,5 +97,92 @@ function createGalleryMarkup(galleryItems) {
 galleryContainer.addEventListener('click', onGalleryContainerClick);
 
 function onGalleryContainerClick(event) {
-  console.log(event.target);
+  event.preventDefault();
+  if (!event.target.classList.contains('gallery__image')) {
+    return;
+  }
+  lightboxOpen(event);
+}
+
+// модальное окно открытие
+const lightbox = document.querySelector('.lightbox');
+
+function lightboxOpen(event) {
+  galleryItems.forEach((element, index) => {
+      if(element.preview === event.target.src) {
+        activeIndex = index;
+      }
+  })
+console.log('activeIndex :>> ', activeIndex);
+  lightbox.classList.add('is-open');
+  lightboxImage.setAttribute('src', event.target.dataset.source);
+  lightboxImage.setAttribute('alt', event.target.alt);
+
+  window.addEventListener('keyup', lightboxCloseESC);
+  window.addEventListener('click', lightboxCloseOverlay);
+}
+
+
+// модальное окно закрытие
+
+const closeButton = document.querySelector(".lightbox__button");
+closeButton.addEventListener('click', lightboxClose);
+
+function lightboxClose(event) {
+  lightbox.classList.remove('is-open');
+  lightboxImage.setAttribute('src', '');
+  lightboxImage.setAttribute('alt', '');
+
+  window.removeEventListener('keyup', lightboxCloseESC);
+  window.removeEventListener('click', lightboxCloseOverlay);
+}
+
+// закрытие по ESC
+
+function lightboxCloseESC(event) {
+  if(event.key !== 'Escape') {
+    return;
+  }
+  lightboxClose(event);
+}
+
+// закрытие по клику на оверлей
+
+function lightboxCloseOverlay(event) {
+  event.stopPropagation();
+  if(event.target !== lightboxOverlay){
+    return;
+  }
+  lightboxClose(event);
+}
+
+// Пролистывание изображений галереи в открытом модальном окне клавишами "влево" и "вправо".
+
+window.addEventListener('keyup', onArrowRightLeftKeys);
+
+function onArrowRightLeftKeys(event) {
+  switch (event.key) {
+      case activeIndex < galleryItems.length - 1 && 'ArrowRight':
+        activeIndex +=1;
+        lightboxImage.src = galleryItems[activeIndex].original;
+        break;
+
+      case activeIndex === galleryItems.length - 1 && 'ArrowRight':
+        activeIndex = 0;
+        lightboxImage.src = galleryItems[activeIndex].original;
+        break;
+
+      case activeIndex > 0 && 'ArrowLeft':
+        activeIndex -=1;
+        lightboxImage.src = galleryItems[activeIndex].original;
+        break;
+
+      case activeIndex === 0 && 'ArrowLeft':
+        activeIndex = galleryItems.length - 1;
+        lightboxImage.src = galleryItems[activeIndex].original;
+        break;
+
+    default:
+      return;
+  }
 }
